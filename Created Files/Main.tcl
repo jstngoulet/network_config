@@ -106,6 +106,15 @@ set udp915 [new Agent/UDP]
 set udp920 [new Agent/UDP]
 set udp923 [new Agent/UDP]
 set udp927 [new Agent/UDP]
+
+# Set flow Ids
+$udp912 set fid_ 1
+$udp914 set fid_ 2
+$udp915 set fid_ 3
+$udp920 set fid_ 4
+$udp923 set fid_ 5
+$udp927 set fid_ 6
+
 # Attach all the agents to node 9
 $ns attach-agent $n9 $udp912
 $ns attach-agent $n9 $udp914
@@ -113,33 +122,64 @@ $ns attach-agent $n9 $udp915
 $ns attach-agent $n9 $udp920
 $ns attach-agent $n9 $udp923
 $ns attach-agent $n9 $udp927
+# Create CBR for each traffic and attach it to each agent
+set cbr0 [new Application/Traffic/CBR]
+set cbr1 [new Application/Traffic/CBR]
+set cbr2 [new Application/Traffic/CBR]
+set cbr3 [new Application/Traffic/CBR]
+set cbr4 [new Application/Traffic/CBR]
+set cbr5 [new Application/Traffic/CBR]
+$cbr0 set packetSize_ 1500
+$cbr1 set packetSize_ 1500
+$cbr2 set packetSize_ 1500
+$cbr3 set packetSize_ 1500
+$cbr4 set packetSize_ 1500
+$cbr5 set packetSize_ 1500
+$cbr0 set interval_ 0.005
+$cbr1 set interval_ 0.005
+$cbr2 set interval_ 0.005
+$cbr3 set interval_ 0.005
+$cbr4 set interval_ 0.005
+$cbr5 set interval_ 0.005
+$cbr0 set random_ 1
+$cbr1 set random_ 1
+$cbr2 set random_ 1
+$cbr3 set random_ 1
+$cbr4 set random_ 1
+$cbr5 set random_ 1
+$cbr0 attach-agent $udp912
+$cbr1 attach-agent $udp914
+$cbr2 attach-agent $udp915
+$cbr3 attach-agent $udp920
+$cbr4 attach-agent $udp923
+$cbr5 attach-agent $udp927
 
 
 # Create a TCP Connection for each Green
 set tcp1018 [new Agent/TCPSink]
 set tcp1618 [new Agent/TCPSink]
+
+# Set Flow Ids
+$tcp1018 set fid_ 7
+$tcp1618 set fid_ 8
+
 # Attach Agents to nodes 13, 16
 $ns attach-agent $n18 $tcp1018
 $ns attach-agent $n18 $tcp1618
-
-# Now, add 1 CBR (node9) and 1 Loss Monitor(dest) per blue connection
-
-# Add 1 EXP (node 13) and 1 Loss monitor(dest) per red connection
+# Create a CBR traffic source and attach it to each tcp
+set cbr01 [new Application/Traffic/CBR]
+set cbr02 [new Application/Traffic/CBR]
+$cbr01 set packetSize_ 1000
+$cbr02 set packetSize_ 1000
+$cbr01 set interval_ 0.005
+$cbr02 set interval_ 0.005
+$cbr01 set random_ 1
+$cbr02 set random_ 1
+$cbr01 attach-agent $tcp1018
+$cbr02 attach-agent $tcp1618
 
 # Create TCP agents and 1 CBR traffic generator at 10 and 16
 # And 2 TCPSink traffic Consumerrs at 18 for Green Connections
-
-
-
-
-# Create a CBR traffic source for each of the starting values
-$cbr9 set packetSize_ 1500
-$cbr9 set interval_ 0.005
-$cbr9 set random_ 1
-
-$cbr1016 set packetSize_ 1000
-$cbr1016 set interval_ 0.005
-$cbr1016 set random_ 1
 
 
 
@@ -204,7 +244,7 @@ proc attach-expoo-traffic
 # Define a procedure which peridodically records the bandwidth recieved by the
 # three traffic sinks sink0/1/2 and writes it to the 3 files f0/f1/f2.
 proc record{}{
-  global sink0 sink1 sink2 f0 f1 f2
+  global sink0 sink1 sink2 sink3 sink4 sink5 sink6 sink7 sink8 f912 f914 f915 f920 f923 f927 f1321 f1018 f1618
 
   #Get an instance of the Simulator
   set $ns [Simulator instance]
@@ -216,19 +256,37 @@ proc record{}{
   set bw0 [$sink0 set bytes_]
   set bw1 [$sink1 set bytes_]
   set bw2 [$sink2 set bytes_]
+  set bw3 [$sink3 set bytes_]
+  set bw4 [$sink4 set bytes_]
+  set bw5 [$sink5 set bytes_]
+  set bw6 [$sink6 set bytes_]
+  set bw7 [$sink7 set bytes_]
+  set bw8 [$sink8 set bytes_]
 
   # Get the current time
   set now [$ns now]
 
   # Calucluate the bandwidth (in Mb/s) and write it to the files
-  puts $f0 "$now [expr $bw0/$time*8/1000000]"
-  puts $f1 "$now [expr $bw1/$time*8/1000000]"
-  puts $f2 "$now [expr $bw2/$time*8/1000000]"
+  puts $f912 "$now [expr $bw0/$time*8/1000000]"
+  puts $f914 "$now [expr $bw1/$time*8/1000000]"
+  puts $f915 "$now [expr $bw2/$time*8/1000000]"
+  puts $f920 "$now [expr $bw3/$time*8/1000000]"
+  puts $f923 "$now [expr $bw4/$time*8/1000000]"
+  puts $f927 "$now [expr $bw5/$time*8/1000000]"
+  puts $f1321 "$now [expr $bw6/$time*8/1000000]"
+  puts $f1018 "$now [expr $bw7/$time*8/1000000]"
+  puts $f1618 "$now [expr $bw8/$time*8/1000000]"
 
   # Reset teh bytes_ values on the traffic sinks
   $sink0 set bytes_ 0
   $sink1 set bytes_ 0
   $sink2 set bytes_ 0
+  $sink3 set bytes_ 0
+  $sink4 set bytes_ 0
+  $sink5 set bytes_ 0
+  $sink6 set bytes_ 0
+  $sink7 set bytes_ 0
+  $sink8 set bytes_ 0
 
   # Re-Schedule the procedure
   $ns at [expr $now+$time] "record"
@@ -245,29 +303,57 @@ set sink5 [new Agent/LossMonitor]
 set sink6 [new Agent/LossMonitor]
 set sink7 [new Agent/LossMonitor]
 set sink8 [new Agent/LossMonitor]
+# Attach the agents to the ending nodes
+$ns attach-agent $12 $sink0
+$ns attach-agent $14 $sink1
+$ns attach-agent $15 $sink2
+$ns attach-agent $20 $sink3
+$ns attach-agent $23 $sink4
+$ns attach-agent $27 $sink5
+$ns attach-agent $21 $sink6
+$ns attach-agent $18 $sink7
+$ns attach-agent $18 $sink8
 
-set source0 [attach-expoo-traffic $n9 $sink12 200 2s 1s 100k]
-set source1 [attach-expoo-traffic $n9 $sink14 200 2s 1s 100k]
-set source2 [attach-expoo-traffic $n9 $sink15 200 2s 1s 100k]
-set source3 [attach-expoo-traffic $n9 $sink20 200 2s 1s 100k]
-set source4 [attach-expoo-traffic $n9 $sink23 200 2s 1s 100k]
-set source5 [attach-expoo-traffic $n9 $sink27 200 2s 1s 100k]
-set source6 [attach-expoo-traffic $n13 $sink21 200 2s 1s 100k]
-set source7 [attach-expoo-traffic $n10 $sink18 200 2s 1s 100k]
-set source8 [attach-expoo-traffic $n16 $sink18 200 2s 1s 100k]
+set source0 [attach-expoo-traffic $n9 $sink0 200 2s 1s 100k]
+set source1 [attach-expoo-traffic $n9 $sink1 200 2s 1s 100k]
+set source2 [attach-expoo-traffic $n9 $sink2 200 2s 1s 100k]
+set source3 [attach-expoo-traffic $n9 $sink3 200 2s 1s 100k]
+set source4 [attach-expoo-traffic $n9 $sink4 200 2s 1s 100k]
+set source5 [attach-expoo-traffic $n9 $sink5 200 2s 1s 100k]
+set source6 [attach-expoo-traffic $n13 $sink6 200 2s 1s 100k]
+set source7 [attach-expoo-traffic $n10 $sink7 200 2s 1s 100k]
+set source8 [attach-expoo-traffic $n16 $sink8 200 2s 1s 100k]
 
 # Start logging the recieevd bandwidth
 $ns at 0.0 "record"
 
 # Start the traffic sources
-$ns at 10.0 "$source0 start"
-$ns at 10.0 "$source1 start"
-$ns at 10.0 "$source2 start"
+$ns at 1.0 "$source0 start"
+$ns at 1.0 "$source1 start"
+$ns at 1.0 "$source2 start"
+$ns at 1.0 "$source3 start"
+$ns at 1.0 "$source4 start"
+$ns at 1.0 "$source5 start"
+$ns at 2.0 "$source6 start"
+$ns at 3.0 "$source7 start"
+$ns at 4.0 "$source8 start"
+
+# At time 6, link 1-3 goes down
+$ns rtmodel-at 6.0 down $n1 $n3
+
+# At time 7, link 1-3 is restored
+$ns rtmodel-at 7.0 up $n1 $n3
 
 # Start the traffic Sources
-$ns at 50.0 "$source0 stop"
-$ns at 50.0 "$source1 stop"
-$ns at 50.0 "$source2 stop"
+$ns at 10.0 "$source0 stop"
+$ns at 10.0 "$source1 stop"
+$ns at 10.0 "$source2 stop"
+$ns at 10.0 "$source3 stop"
+$ns at 10.0 "$source4 stop"
+$ns at 10.0 "$source5 stop"
+$ns at 10.0 "$source6 stop"
+$ns at 10.0 "$source7 stop"
+$ns at 10.0 "$source8 stop"
 
 # Call the finish procedure after 10 seconds simulation time
 $ns at 10.0 "finish"
