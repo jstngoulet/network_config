@@ -13,41 +13,10 @@ set f1321 [open Node13out21.tr w]
 set f1018 [open Node10out18.tr w]
 set f1618 [open Node16out18.tr w]
 
-# Create the nodes
-set n0 [$ns node]
-set n1 [$ns node]
-set n2 [$ns node]
-set n3 [$ns node]
-
-set n4 [$ns node]
-set n5 [$ns node]
-set n6 [$ns node]
-set n7 [$ns node]
-
-set n8 [$ns node]
-set n9 [$ns node]
-set n10 [$ns node]
-set n11 [$ns node]
-
-set n12 [$ns node]
-set n13 [$ns node]
-set n14 [$ns node]
-set n15 [$ns node]
-
-set n16 [$ns node]
-set n17 [$ns node]
-set n18 [$ns node]
-set n19 [$ns node]
-
-set n20 [$ns node]
-set n21 [$ns node]
-set n22 [$ns node]
-set n23 [$ns node]
-
-set n24 [$ns node]
-set n25 [$ns node]
-set n26 [$ns node]
-set n27 [$ns node]
+# Create the nodes (up to 27)
+for {set i 0} {$i < 28} {incr i} {
+        set $ns$i [$ns node]
+}
 
 # Connect the nodes
 # |0|
@@ -132,7 +101,36 @@ $ns queue-limit $ns3 $ns1 20
 
 # Create a UDP Connection for each blue
 set udp912 [new Agent/UDP]
-$ns attach-agent $
+set udp914 [new Agent/UDP]
+set udp915 [new Agent/UDP]
+set udp920 [new Agent/UDP]
+set udp923 [new Agent/UDP]
+set udp927 [new Agent/UDP]
+# Attach all the agents to node 9
+$ns attach-agent $n9 $udp912
+$ns attach-agent $n9 $udp914
+$ns attach-agent $n9 $udp915
+$ns attach-agent $n9 $udp920
+$ns attach-agent $n9 $udp923
+$ns attach-agent $n9 $udp927
+
+
+# Create a TCP Connection for each Green
+set tcp1018 [new Agent/TCPSink]
+set tcp1618 [new Agent/TCPSink]
+# Attach Agents to nodes 13, 16
+$ns attach-agent $n18 $tcp1018
+$ns attach-agent $n18 $tcp1618
+
+# Now, add 1 CBR (node9) and 1 Loss Monitor(dest) per blue connection
+
+# Add 1 EXP (node 13) and 1 Loss monitor(dest) per red connection
+
+# Create TCP agents and 1 CBR traffic generator at 10 and 16
+# And 2 TCPSink traffic Consumerrs at 18 for Green Connections
+
+
+
 
 # Create a CBR traffic source for each of the starting values
 $cbr9 set packetSize_ 1500
@@ -237,18 +235,26 @@ proc record{}{
 
 }
 
-# Create three traffic sinks and attach them to node n4
+# Create a total of 9 sources
 set sink0 [new Agent/LossMonitor]
 set sink1 [new Agent/LossMonitor]
 set sink2 [new Agent/LossMonitor]
-$ns attach-agent $ns4 $sink0
-$ns attach-agent $ns4 $sink1
-$ns attach-agent $ns4 $sink2
+set sink3 [new Agent/LossMonitor]
+set sink4 [new Agent/LossMonitor]
+set sink5 [new Agent/LossMonitor]
+set sink6 [new Agent/LossMonitor]
+set sink7 [new Agent/LossMonitor]
+set sink8 [new Agent/LossMonitor]
 
-# Create 3 traffic sources
-set source0 [attach-expoo-traffic $ns0 $sink0 200 2s 1s 100k]
-set source1 [attach-expoo-traffic $ns0 $sink1 200 2s 1s 200k]
-set source2 [attach-expoo-traffic $ns0 $sink2 200 2s 1s 300k]
+set source0 [attach-expoo-traffic $n9 $sink12 200 2s 1s 100k]
+set source1 [attach-expoo-traffic $n9 $sink14 200 2s 1s 100k]
+set source2 [attach-expoo-traffic $n9 $sink15 200 2s 1s 100k]
+set source3 [attach-expoo-traffic $n9 $sink20 200 2s 1s 100k]
+set source4 [attach-expoo-traffic $n9 $sink23 200 2s 1s 100k]
+set source5 [attach-expoo-traffic $n9 $sink27 200 2s 1s 100k]
+set source6 [attach-expoo-traffic $n13 $sink21 200 2s 1s 100k]
+set source7 [attach-expoo-traffic $n10 $sink18 200 2s 1s 100k]
+set source8 [attach-expoo-traffic $n16 $sink18 200 2s 1s 100k]
 
 # Start logging the recieevd bandwidth
 $ns at 0.0 "record"
