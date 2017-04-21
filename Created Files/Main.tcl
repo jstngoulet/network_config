@@ -122,37 +122,7 @@ $ns attach-agent $n9 $udp915
 $ns attach-agent $n9 $udp920
 $ns attach-agent $n9 $udp923
 $ns attach-agent $n9 $udp927
-# Create CBR for each traffic and attach it to each agent
-set cbr0 [new Application/Traffic/CBR]
-set cbr1 [new Application/Traffic/CBR]
-set cbr2 [new Application/Traffic/CBR]
-set cbr3 [new Application/Traffic/CBR]
-set cbr4 [new Application/Traffic/CBR]
-set cbr5 [new Application/Traffic/CBR]
-$cbr0 set packetSize_ 1500
-$cbr1 set packetSize_ 1500
-$cbr2 set packetSize_ 1500
-$cbr3 set packetSize_ 1500
-$cbr4 set packetSize_ 1500
-$cbr5 set packetSize_ 1500
-$cbr0 set interval_ 0.005
-$cbr1 set interval_ 0.005
-$cbr2 set interval_ 0.005
-$cbr3 set interval_ 0.005
-$cbr4 set interval_ 0.005
-$cbr5 set interval_ 0.005
-$cbr0 set random_ 1
-$cbr1 set random_ 1
-$cbr2 set random_ 1
-$cbr3 set random_ 1
-$cbr4 set random_ 1
-$cbr5 set random_ 1
-$cbr0 attach-agent $udp912
-$cbr1 attach-agent $udp914
-$cbr2 attach-agent $udp915
-$cbr3 attach-agent $udp920
-$cbr4 attach-agent $udp923
-$cbr5 attach-agent $udp927
+
 
 
 # Create a TCP Connection for each Green
@@ -166,38 +136,14 @@ $tcp1618 set fid_ 8
 # Attach Agents to nodes 13, 16
 $ns attach-agent $n18 $tcp1018
 $ns attach-agent $n18 $tcp1618
-# Create a CBR traffic source and attach it to each tcp
-set cbr01 [new Application/Traffic/CBR]
-set cbr02 [new Application/Traffic/CBR]
-$cbr01 set packetSize_ 1000
-$cbr02 set packetSize_ 1000
-$cbr01 set interval_ 0.005
-$cbr02 set interval_ 0.005
-$cbr01 set random_ 1
-$cbr02 set random_ 1
-$cbr01 attach-agent $tcp1018
-$cbr02 attach-agent $tcp1618
-
-# Create TCP agents and 1 CBR traffic generator at 10 and 16
-# And 2 TCPSink traffic Consumerrs at 18 for Green Connections
-
 
 
 # Define a 'Finish' procedure
 proc finish{}{
-  global f912 f914 f915 f920 f923 f927 f1321 f1018 f1618
+  global f1
 
   # Close the output files
-  close $f912
-  close $f914
-  close $f915
-  close $f920
-  close $f923
-  close $f927
-
-  close $f1321
-  close $f1018
-  close $f1618
+  close f1
 
   # Exit the procedure cleanly
   exit 0
@@ -314,15 +260,28 @@ $ns attach-agent $21 $sink6
 $ns attach-agent $18 $sink7
 $ns attach-agent $18 $sink8
 
-set source0 [attach-expoo-traffic $n9 $sink0 200 2s 1s 100k]
-set source1 [attach-expoo-traffic $n9 $sink1 200 2s 1s 100k]
-set source2 [attach-expoo-traffic $n9 $sink2 200 2s 1s 100k]
-set source3 [attach-expoo-traffic $n9 $sink3 200 2s 1s 100k]
-set source4 [attach-expoo-traffic $n9 $sink4 200 2s 1s 100k]
-set source5 [attach-expoo-traffic $n9 $sink5 200 2s 1s 100k]
-set source6 [attach-expoo-traffic $n13 $sink6 200 2s 1s 100k]
-set source7 [attach-expoo-traffic $n10 $sink7 200 2s 1s 100k]
-set source8 [attach-expoo-traffic $n16 $sink8 200 2s 1s 100k]
+# Create all of the traffic sources (1 CBR @ 9, 1 EXP @ 13 and 1 CBR @ Each 10 + 16)# Create CBR for each traffic and attach it to each agent
+set cbr0 [new Application/Traffic/CBR]
+$cbr0 set packetSize_1500
+$cbr0 set interval_ 0.005
+$cbr0 set random_ 1
+
+set expSource [attach-expoo-traffic $n13 $sink6 200 0.5s 0.5s 100k]
+
+set cbr1 [new Application/Traffic/CBR]
+$cbr1 set packetSize_ 1000
+$cbr1 set interval_ 0.005
+$cbr1 set random_ 1
+
+set cbr2 [new Application/Traffic/CBR]
+$cbr2 set packetSize_ 1000
+$cbr2 set interval_ 0.005
+$cbr2 set random_ 1
+
+# Attach the sources to the correct agent
+$ns attach-agent $ns9 $cbr0
+$ns attach-agent $ns10 $cbr1
+$ns attach-agent $ns16 $cbr2
 
 # Start logging the recieevd bandwidth
 $ns at 0.0 "record"
