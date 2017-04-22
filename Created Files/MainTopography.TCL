@@ -220,7 +220,7 @@ set exp1321 [new Application/Traffic/Exponential]
 $exp1321 set packetSize_ 200
 $exp1321 set burst_time_ 0.5s
 $exp1321 set idle_time_ 0.5s
-$exp1321 set rate_ 1000000
+$exp1321 set rate_ 100000
 
 # Attach the udp agent and the exp generator
 $exp1321 attach-agent $udp1321
